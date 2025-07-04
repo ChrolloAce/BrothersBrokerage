@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center px-4 py-3 text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-textActive transition-colors duration-200 rounded-lg mx-2 my-1;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-primary-500 text-white;
+  }
+  
+  .metric-card {
+    @apply bg-white rounded-xl p-6 shadow-sm border border-gray-100;
+  }
+  
+  .chart-card {
+    @apply bg-white rounded-xl p-6 shadow-sm border border-gray-100;
+  }
+} 

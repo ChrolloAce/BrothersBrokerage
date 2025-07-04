@@ -273,7 +273,7 @@ export class ClientManager {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  private generateDefaultMilestones(caseId: string) {
+  private generateDefaultMilestones(_caseId: string) {
     return [
       {
         id: this.generateId(),

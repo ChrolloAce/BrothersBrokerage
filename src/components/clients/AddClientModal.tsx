@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User, Mail, Phone, MapPin, Building } from 'lucide-react';
+import { X, User, Building } from 'lucide-react';
 import { PersonalInfo, CareManager as CareManagerType, ServiceType } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
 
@@ -57,7 +57,7 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }: AddClientModalProps)
       setPersonalInfo(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof PersonalInfo],
+          ...(prev[parent as keyof PersonalInfo] as object || {}),
           [child]: value
         }
       }));

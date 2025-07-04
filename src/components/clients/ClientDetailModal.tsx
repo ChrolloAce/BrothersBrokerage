@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Client, PIPELINE_STAGES } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
 import { 
-  X, User, Mail, Phone, MapPin, Building, Calendar, FileText, 
-  Clock, CheckCircle, Plus, Archive, Edit3, Activity, 
-  MessageCircle, Star, TrendingUp, Users
+  X, User, Mail, Phone, MapPin, Building, FileText, 
+  Clock, CheckCircle, Plus, Archive, Activity
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -304,7 +303,7 @@ const ClientDetailModal = ({ client, isOpen, onClose, onClientUpdated }: ClientD
 
               {/* Timeline */}
               <div className="space-y-4">
-                {client.timeline.map((event, index) => (
+                {client.timeline.map((event) => (
                   <div key={event.id} className="flex space-x-4">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Client } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
-import { Plus, Search, Filter, Eye, Edit, Trash2, Mail, Phone, MapPin, User, Calendar, Tag, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, User, MoreHorizontal } from 'lucide-react';
 
 const ClientManagement = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -9,7 +9,6 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const clientManager = ClientManager.getInstance();
 
   useEffect(() => {
@@ -40,11 +39,6 @@ const ClientManagement = () => {
     return client.status === filterStatus;
   });
 
-  const showNotification = (message: string, type: 'success' | 'error') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96 bg-gray-50">
@@ -58,15 +52,6 @@ const ClientManagement = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Notification */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-md shadow-lg transition-all duration-300 ${
-          notification.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
-        }`}>
-          <div className="text-sm font-medium">{notification.message}</div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="px-6 py-4">

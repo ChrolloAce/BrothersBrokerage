@@ -1,6 +1,5 @@
 import { DashboardMetrics } from '../../types';
 import MetricCard from './MetricCard';
-import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface MetricsGridProps {
   metrics: DashboardMetrics;
@@ -13,28 +12,28 @@ const MetricsGrid = ({ metrics }: MetricsGridProps) => {
       value: metrics.totalClients.toString(),
       growth: metrics.clientsGrowth,
       icon: '👥',
-      color: 'blue'
+      color: 'blue' as const
     },
     {
       title: 'Monthly Revenue',
       value: `$${metrics.monthlyRevenue.toLocaleString()}`,
       growth: metrics.revenueGrowth,
       icon: '💰',
-      color: 'green'
+      color: 'green' as const
     },
     {
       title: 'Completion Rate',
       value: `${metrics.completionRate}%`,
       growth: metrics.completionGrowth,
       icon: '📊',
-      color: 'purple'
+      color: 'purple' as const
     },
     {
       title: 'Active Leads',
       value: metrics.activeLeads.toString(),
       growth: metrics.leadsGrowth,
       icon: '🎯',
-      color: 'orange'
+      color: 'orange' as const
     }
   ];
 

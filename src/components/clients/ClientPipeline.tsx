@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Client, PIPELINE_STAGES, PipelineStage, CustomPipeline, DEFAULT_PIPELINES, CustomPipelineStage } from '../../types/client';
+import { Client, PIPELINE_STAGES, PipelineStage, CustomPipeline, DEFAULT_PIPELINES } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
-import { Plus, Filter, Search, Users, BarChart3, Settings, CheckSquare, Square, Edit3, Trash2, ChevronRight, User, Phone, Mail, Calendar, MapPin, Tag, TrendingUp, Clock, FileText, AlertCircle, MoreHorizontal, Eye, List, Grid, ChevronDown, Move } from 'lucide-react';
+import { Plus, Search, Users, Settings, CheckSquare, Square, User, Phone, Mail, MapPin, ChevronDown, Move, Eye, List, Grid } from 'lucide-react';
 
 const ClientPipeline = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -15,9 +15,8 @@ const ClientPipeline = () => {
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const [viewMode, setViewMode] = useState<'pipeline' | 'list'>('pipeline');
   const [bulkMoveStage, setBulkMoveStage] = useState<PipelineStage>('lead-intake');
-  const [availablePipelines, setAvailablePipelines] = useState<CustomPipeline[]>(DEFAULT_PIPELINES);
+  const [availablePipelines] = useState<CustomPipeline[]>(DEFAULT_PIPELINES);
   const [currentPipeline, setCurrentPipeline] = useState<CustomPipeline>(DEFAULT_PIPELINES[0]);
-  const [showPipelineSettings, setShowPipelineSettings] = useState(false);
   const [showClientSelector, setShowClientSelector] = useState(false);
   const [availableClients, setAvailableClients] = useState<Client[]>([]);
   const [selectedForImport, setSelectedForImport] = useState<Set<string>>(new Set());
@@ -75,8 +74,6 @@ const ClientPipeline = () => {
       showNotification('Cannot move client to this stage. Please check workflow requirements.', 'error');
     }
   };
-
-
 
   const handleClientPositionChange = async (clientId: string, newStage: PipelineStage) => {
     try {
@@ -300,7 +297,7 @@ const ClientPipeline = () => {
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
                   <button
-                    onClick={() => setShowPipelineSettings(true)}
+                    onClick={() => setShowClientSelector(true)}
                     className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
                     title="Manage Pipelines"
                   >

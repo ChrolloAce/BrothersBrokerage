@@ -1,5 +1,5 @@
 import { Client } from '../../types/client';
-import { Calendar, Mail, Phone, User, Clock, CheckCircle, Star, ArrowRight } from 'lucide-react';
+import { Calendar, Mail, Phone, User, Clock, Star, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ClientCardProps {

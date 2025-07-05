@@ -7,20 +7,14 @@ import {
   setDoc, 
   updateDoc, 
   deleteDoc, 
-  addDoc, 
   query, 
   where, 
-  orderBy, 
-  limit,
+  writeBatch, 
+  serverTimestamp, 
   onSnapshot,
-  serverTimestamp,
-  writeBatch,
-  Timestamp,
-  DocumentSnapshot,
-  QuerySnapshot
+  Timestamp
 } from 'firebase/firestore';
-import { auth } from '../firebase/config';
-import { UserProfile, Organization, InviteLink, UserRole, Permission } from '../types/user';
+import { UserProfile, Organization, InviteLink, UserRole } from '../types/user';
 import { Client } from '../types/client';
 
 export class FirebaseService {

@@ -1,15 +1,10 @@
 import { 
   Client, 
-  ClientCase, 
   PipelineStage, 
   TimelineEvent, 
   TimelineEventType,
   PIPELINE_STAGES,
-  PersonalInfo,
-  CareManager as CareManagerType,
-  ServiceType,
-  ClientStatus,
-  MilestoneStatus
+  ClientStatus
 } from '../types/client';
 import { OrganizationManager } from './OrganizationManager';
 

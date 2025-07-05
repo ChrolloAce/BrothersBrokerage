@@ -139,7 +139,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Logged in but needs onboarding
   if (needsOnboarding) {
-    return <Onboarding user={user} onComplete={handleOnboardingComplete} />;
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   // User is logged in, has profile, and has completed onboarding

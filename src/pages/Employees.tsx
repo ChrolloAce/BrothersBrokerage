@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { OrganizationManager } from '../managers/OrganizationManager';
 import { UserProfile } from '../types/user';
 import { AuthService } from '../services/AuthService';
 import EmployeeManagement from '../components/employees/EmployeeManagement';
-import { Shield, Users, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle } from 'lucide-react';
 
 const Employees = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);

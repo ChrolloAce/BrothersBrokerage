@@ -1,12 +1,17 @@
-import { Organization, UserProfile, InviteLink, UserRole, Permission, ROLE_PERMISSIONS, OrganizationSettings } from '../types/user';
-import { Client } from '../types/client';
 import { FirebaseService } from '../services/FirebaseService';
-import { AuthService } from '../services/AuthService';
+import { 
+  UserProfile, 
+  UserRole, 
+  Organization, 
+  InviteLink,
+  Permission,
+  ROLE_PERMISSIONS 
+} from '../types/user';
+import { Client } from '../types/client';
 
 export class OrganizationManager {
   private static instance: OrganizationManager;
   private firebaseService: FirebaseService;
-  private authService: AuthService;
   private currentUser: UserProfile | null = null;
   private currentOrganization: Organization | null = null;
 
@@ -19,7 +24,6 @@ export class OrganizationManager {
 
   constructor() {
     this.firebaseService = FirebaseService.getInstance();
-    this.authService = AuthService.getInstance();
   }
 
   // User Session Management
@@ -373,21 +377,19 @@ export class OrganizationManager {
 
   // Organization Settings
   async updateOrganizationSettings(
-    organizationId: string, 
-    settings: Partial<OrganizationSettings>
-  ): Promise<boolean> {
+    orgId: string,
+    settings: Partial<Organization>
+  ): Promise<void> {
     try {
-      const organization = await this.firebaseService.getOrganization(organizationId);
-      if (!organization) return false;
+      const organization = await this.firebaseService.getOrganization(orgId);
+      if (!organization) return;
 
-      await this.firebaseService.updateOrganization(organizationId, {
+      await this.firebaseService.updateOrganization(orgId, {
         settings: { ...organization.settings, ...settings }
       });
-      
-      return true;
     } catch (error) {
       console.error('Error updating organization settings:', error);
-      return false;
+      throw error;
     }
   }
 
@@ -498,4 +500,4 @@ export class OrganizationManager {
       return false;
     }
   }
-} 
+}

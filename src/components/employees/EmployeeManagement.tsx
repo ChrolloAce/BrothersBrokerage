@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { UserProfile, InviteLink, Permission, ROLE_PERMISSIONS } from '../../types/user';
+import { UserProfile, InviteLink } from '../../types/user';
 import { OrganizationManager } from '../../managers/OrganizationManager';
 import { 
-  Users, Plus, Search, Mail, Phone, Shield, Settings, 
-  Copy, Check, ExternalLink, MoreHorizontal, Edit, Trash2,
-  Calendar, Clock, AlertCircle, UserCheck, UserX
+  Users, Plus, Search, Mail, Phone, 
+  Copy, Edit, Trash2,
+  Clock, UserCheck, UserX
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -80,7 +80,7 @@ const EmployeeManagement = () => {
         return;
       }
       
-      const invite = await orgManager.createInviteLink(
+      await orgManager.createInviteLink(
         currentUser.organizationId,
         role,
         currentUser.id,

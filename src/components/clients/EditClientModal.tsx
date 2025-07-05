@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ClientManager } from '../../managers/ClientManager';
-import { Client, ServiceType, CasePriority } from '../../types/client';
+import { Client, ServiceType } from '../../types/client';
 import { X, User, MapPin, Building, Loader2, Save } from 'lucide-react';
 
 interface EditClientModalProps {

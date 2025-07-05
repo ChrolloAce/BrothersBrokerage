@@ -1,28 +1,27 @@
-import { useState, useEffect } from 'react';
-import { UserRole, Organization, OnboardingData } from '../../types/user';
+import { useState } from 'react';
+import { UserRole } from '../../types/user';
 import { OrganizationManager } from '../../managers/OrganizationManager';
+import { AuthService } from '../../services/AuthService';
 import { 
   Building, Users, User as UserIcon, ChevronRight, ChevronLeft, 
-  Loader2, CheckCircle, XCircle, AlertCircle, Link, Mail 
+  Loader2, CheckCircle, AlertCircle, Link, Mail 
 } from 'lucide-react';
 
 interface OnboardingProps {
-  user: User;
   onComplete: () => void;
 }
 
-const Onboarding = ({ user, onComplete }: OnboardingProps) => {
+const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    role: 'business-owner'
-  });
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
   const orgManager = OrganizationManager.getInstance();
+  const authService = AuthService.getInstance();
 
   const handleRoleSelection = (role: UserRole) => {
-    setOnboardingData({ ...onboardingData, role });
+    setSelectedRole(role);
     setStep(2);
   };
 
@@ -31,6 +30,11 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
     setError(null);
 
     try {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        throw new Error('No user found');
+      }
+
       // Create user profile first
       const userProfile = await orgManager.createUserProfile(
         user.uid,
@@ -65,18 +69,23 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
     setError(null);
 
     try {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        throw new Error('No user found');
+      }
+
       // Create user profile first
       const userProfile = await orgManager.createUserProfile(
         user.uid,
         user.email || '',
         user.displayName || '',
-        onboardingData.role
+        selectedRole as UserRole
       );
 
       let success = false;
 
       if (joinMethod === 'code') {
-        success = await orgManager.joinByCode(value, userProfile.id, onboardingData.role);
+        success = await orgManager.joinByCode(value, userProfile.id, selectedRole as UserRole);
       } else {
         success = await orgManager.useInviteLink(value, userProfile.id);
       }
@@ -206,7 +215,7 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
             </button>
 
             {/* Business Owner Setup */}
-            {onboardingData.role === 'business-owner' && (
+            {selectedRole === 'business-owner' && (
               <BusinessOwnerSetup 
                 onSetup={handleBusinessOwnerSetup}
                 loading={loading}
@@ -215,9 +224,9 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
             )}
 
             {/* Employee/Client Setup */}
-            {(onboardingData.role === 'employee' || onboardingData.role === 'client') && (
+            {(selectedRole === 'employee' || selectedRole === 'client') && (
               <JoinOrganizationSetup
-                role={onboardingData.role}
+                role={selectedRole}
                 onJoin={handleJoinOrganization}
                 loading={loading}
                 error={error}

@@ -1,5 +1,6 @@
 export interface Client {
   id: string;
+  organizationId: string; // Organization this client belongs to
   personalInfo: PersonalInfo;
   careManager: CareManager;
   services: ServiceType[];

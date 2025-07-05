@@ -29,7 +29,7 @@ const ClientPipeline = () => {
 
   const loadAvailableClients = async () => {
     try {
-      const allClients = await clientManager.getAllClients();
+      const allClients = await clientManager.getClients();
       // Show clients not currently in any pipeline
       const unassignedClients = allClients.filter(c => !c.isArchived && !c.pipelineId);
       setAvailableClients(unassignedClients);
@@ -40,7 +40,7 @@ const ClientPipeline = () => {
 
   const loadClients = async () => {
     try {
-      const allClients = await clientManager.getAllClients();
+      const allClients = await clientManager.getClients();
       // Only show clients assigned to current pipeline
       const pipelineClients = allClients.filter(c => !c.isArchived && c.pipelineId === currentPipeline.id);
       setClients(pipelineClients);

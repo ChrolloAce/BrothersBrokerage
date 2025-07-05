@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    function isOwner(userId) {
+      return getUserId() == userId;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(getUserId())).data;
+    }
+    
+    function getUserRole() {
+      return getUserData().role;
+    }
+    
+    function getUserOrganizationId() {
+      return getUserData().organizationId;
+    }
+    
+    function isBusinessOwner() {
+      return getUserRole() == 'business-owner';
+    }
+    
+    function isEmployee() {
+      return getUserRole() == 'employee';
+    }
+    
+    function isClient() {
+      return getUserRole() == 'client';
+    }
+    
+    function hasPermission(permission) {
+      return permission in getUserData().permissions;
+    }
+    
+    function isSameOrganization(orgId) {
+      return getUserOrganizationId() == orgId;
+    }
+
+    // Users collection - Allow authenticated users to manage their own profile and read others
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // Allow authenticated users to read other users (for organization functionality)
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to update other users (for organization management)
+      allow update: if isAuthenticated();
+      
+      // Allow creation during onboarding
+      allow create: if isAuthenticated();
+    }
+
+    // Organizations collection - Allow authenticated users to create and manage organizations
+    match /organizations/{orgId} {
+      // Allow authenticated users to read and write organizations
+      allow read, write: if isAuthenticated();
+      
+      // Allow creation for authenticated users
+      allow create: if isAuthenticated();
+      
+      // Allow updates for authenticated users
+      allow update: if isAuthenticated();
+    }
+
+    // Clients collection - Allow authenticated users to manage clients
+    match /clients/{clientId} {
+      // Allow authenticated users to read and write clients
+      allow read, write: if isAuthenticated();
+      
+      // Allow creation for authenticated users
+      allow create: if isAuthenticated();
+      
+      // Allow updates for authenticated users
+      allow update: if isAuthenticated();
+    }
+
+    // Invites collection - Allow authenticated users to manage invites
+    match /invites/{inviteId} {
+      // Allow authenticated users to read and write invites
+      allow read, write: if isAuthenticated();
+      
+      // Allow creation for authenticated users
+      allow create: if isAuthenticated();
+      
+      // Allow updates for authenticated users
+      allow update: if isAuthenticated();
+    }
+
+    // Sessions collection - Allow users to manage their own sessions
+    match /sessions/{userId} {
+      // Users can read and write their own session
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // Also allow any authenticated user to create sessions
+      allow create: if isAuthenticated();
+    }
+
+    // Default rule for development - allow authenticated users
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+} 

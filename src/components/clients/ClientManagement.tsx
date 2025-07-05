@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Client } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
-import { Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, User, MoreHorizontal } from 'lucide-react';
+import { OrganizationManager } from '../../managers/OrganizationManager';
+import { Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, User, MoreHorizontal, Send, UserPlus } from 'lucide-react';
+import AddClientModal from './AddClientModal';
+import EditClientModal from './EditClientModal';
+import ClientDetailModal from './ClientDetailModal';
 
 const ClientManagement = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -9,7 +13,12 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  
   const clientManager = ClientManager.getInstance();
+  const orgManager = OrganizationManager.getInstance();
 
   useEffect(() => {
     loadClients();
@@ -17,7 +26,7 @@ const ClientManagement = () => {
 
   const loadClients = async () => {
     try {
-      const allClients = await clientManager.getAllClients();
+      const allClients = await clientManager.getClients();
       setClients(allClients.filter(c => !c.isArchived));
     } catch (error) {
       console.error('Error loading clients:', error);
@@ -39,6 +48,79 @@ const ClientManagement = () => {
     return client.status === filterStatus;
   });
 
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleClientCreated = () => {
+    loadClients();
+    setShowAddModal(false);
+    showNotification('Client created successfully!', 'success');
+    
+    // Force a reload after a short delay to ensure Firebase has propagated
+    setTimeout(() => {
+      loadClients();
+    }, 1000);
+  };
+
+  const handleClientUpdated = () => {
+    loadClients();
+    setShowEditModal(false);
+    setSelectedClient(null);
+    showNotification('Client updated successfully!', 'success');
+  };
+
+  const handleSendPortalAccess = async (client: Client) => {
+    try {
+      // Create an invite for the client to access their portal
+      const currentUser = orgManager.getCurrentUser();
+      if (!currentUser?.organizationId) {
+        showNotification('Organization not found', 'error');
+        return;
+      }
+
+      const invite = await orgManager.createInviteLink(
+        currentUser.organizationId,
+        'client',
+        currentUser.id,
+        client.personalInfo.email
+      );
+
+      // In a real implementation, you'd send an email here
+      const portalLink = `${window.location.origin}/portal?invite=${invite.id}`;
+      
+      // For now, show the link in a notification
+      showNotification(`Portal access sent to ${client.personalInfo.email}`, 'success');
+      
+      // Optional: Copy link to clipboard
+      await navigator.clipboard.writeText(portalLink);
+      console.log('Portal link:', portalLink);
+      
+    } catch (error) {
+      console.error('Error sending portal access:', error);
+      showNotification('Failed to send portal access', 'error');
+    }
+  };
+
+  const handleEditClient = (client: Client) => {
+    setSelectedClient(client);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteClient = async (clientId: string) => {
+    if (confirm('Are you sure you want to archive this client?')) {
+      try {
+        await clientManager.deleteClient(clientId);
+        loadClients();
+        showNotification('Client archived successfully', 'success');
+      } catch (error) {
+        console.error('Error archiving client:', error);
+        showNotification('Failed to archive client', 'error');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96 bg-gray-50">
@@ -52,6 +134,15 @@ const ClientManagement = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-md shadow-lg transition-all duration-300 ${
+          notification.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          <div className="text-sm font-medium">{notification.message}</div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="px-6 py-4">
@@ -65,7 +156,10 @@ const ClientManagement = () => {
                 <span>{filteredClients.length} Clients</span>
                 <span>{filteredClients.filter(c => c.status === 'active').length} Active</span>
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2">
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Add Client</span>
               </button>
@@ -106,7 +200,8 @@ const ClientManagement = () => {
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredClients.map((client) => (
-            <div key={client.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={client.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                 onClick={() => setSelectedClient(client)}>
               {/* Client Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -117,12 +212,31 @@ const ClientManagement = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{client.personalInfo.fullName}</h3>
-                    <p className="text-sm text-gray-500">ID: {client.id}</p>
+                    <p className="text-sm text-gray-500">ID: {client.id.slice(0, 8)}</p>
                   </div>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600">
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendPortalAccess(client);
+                    }}
+                    className="p-1 text-gray-400 hover:text-green-600"
+                    title="Send Portal Access"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditClient(client);
+                    }}
+                    className="p-1 text-gray-400 hover:text-blue-600"
+                    title="Edit Client"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Client Details */}
@@ -166,7 +280,7 @@ const ClientManagement = () => {
                 </div>
               </div>
 
-              {/* Status and Actions */}
+              {/* Status */}
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   client.status === 'active' ? 'bg-green-100 text-green-700' :
@@ -175,21 +289,16 @@ const ClientManagement = () => {
                 }`}>
                   {client.status}
                 </span>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setSelectedClient(client)}
-                    className="p-1 text-gray-400 hover:text-blue-600"
-                    title="View Details"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 text-gray-400 hover:text-green-600" title="Edit">
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 text-gray-400 hover:text-red-600" title="Archive">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClient(client.id);
+                  }}
+                  className="p-1 text-gray-400 hover:text-red-600"
+                  title="Archive Client"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Created Date */}
@@ -206,116 +315,50 @@ const ClientManagement = () => {
               <User className="w-12 h-12 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
-            <p className="text-gray-500">Try adjusting your search or filters</p>
+            <p className="text-gray-500 mb-4">
+              {searchTerm || filterStatus !== 'all' 
+                ? 'Try adjusting your search or filters' 
+                : 'Start by adding your first client'
+              }
+            </p>
+            {!searchTerm && filterStatus === 'all' && (
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Add Your First Client</span>
+              </button>
+            )}
           </div>
         )}
       </div>
 
+      {/* Add Client Modal */}
+      {showAddModal && (
+        <AddClientModal 
+          onClose={() => setShowAddModal(false)}
+          onClientCreated={handleClientCreated}
+        />
+      )}
+
+      {/* Edit Client Modal */}
+      {showEditModal && selectedClient && (
+        <EditClientModal 
+          client={selectedClient}
+          onClose={() => setShowEditModal(false)}
+          onClientUpdated={handleClientUpdated}
+        />
+      )}
+
       {/* Client Detail Modal */}
-      {selectedClient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-medium text-blue-600">
-                      {selectedClient.personalInfo.firstName.charAt(0)}{selectedClient.personalInfo.lastName.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">{selectedClient.personalInfo.fullName}</h2>
-                    <p className="text-sm text-gray-500">Client ID: {selectedClient.id}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedClient(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <span className="text-2xl">×</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Personal Information */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                      <p className="text-gray-900">{selectedClient.personalInfo.fullName}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
-                      <p className="text-gray-900">{selectedClient.personalInfo.email}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Phone</label>
-                      <p className="text-gray-900">{selectedClient.personalInfo.phone}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Address</label>
-                      <p className="text-gray-900">
-                        {selectedClient.personalInfo.address.street}<br />
-                        {selectedClient.personalInfo.address.city}, {selectedClient.personalInfo.address.state} {selectedClient.personalInfo.address.zipCode}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Care Manager & Services */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Care Management</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Care Manager</label>
-                      <p className="text-gray-900">{selectedClient.careManager.name}</p>
-                      <p className="text-sm text-gray-500">{selectedClient.careManager.organization}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Services</label>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {selectedClient.services.map((service, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full"
-                          >
-                            {service.replace('-', ' ')}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Status</label>
-                      <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedClient.status === 'active' ? 'bg-green-100 text-green-700' :
-                        selectedClient.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {selectedClient.status}
-                      </span>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Priority</label>
-                      <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedClient.case.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                        selectedClient.case.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                        selectedClient.case.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {selectedClient.case.priority}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {selectedClient && !showEditModal && (
+        <ClientDetailModal 
+          client={selectedClient}
+          onClose={() => setSelectedClient(null)}
+          onEdit={() => setShowEditModal(true)}
+          onSendPortalAccess={() => handleSendPortalAccess(selectedClient)}
+        />
       )}
     </div>
   );

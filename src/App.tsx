@@ -3,6 +3,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import Pipelines from './pages/Pipelines';
+import Employees from './pages/Employees';
 import Leads from './pages/Leads';
 import Budgets from './pages/Budgets';
 import Documents from './pages/Documents';
@@ -19,6 +20,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="clients" element={<Clients />} />
             <Route path="pipelines" element={<Pipelines />} />
+            <Route path="employees" element={<Employees />} />
             <Route path="leads" element={<Leads />} />
             <Route path="budgets" element={<Budgets />} />
             <Route path="documents" element={<Documents />} />

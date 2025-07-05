@@ -16,8 +16,8 @@ const ClientArchive = () => {
 
   const loadArchivedClients = async () => {
     try {
-      const allClients = await clientManager.getAllClients(true);
-      setArchivedClients(allClients.filter(client => client.isArchived));
+      const allClients = await clientManager.getClients();
+      setArchivedClients(allClients.filter((client: Client) => client.isArchived));
     } catch (error) {
       console.error('Error loading archived clients:', error);
     } finally {
@@ -27,7 +27,7 @@ const ClientArchive = () => {
 
   const handleUnarchive = async (clientId: string) => {
     try {
-      await clientManager.unarchiveClient(clientId);
+      await clientManager.updateClient(clientId, { isArchived: false, status: 'active' });
       await loadArchivedClients();
     } catch (error) {
       console.error('Error unarchiving client:', error);

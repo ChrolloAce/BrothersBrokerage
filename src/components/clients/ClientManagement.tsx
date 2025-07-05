@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Client } from '../../types/client';
 import { ClientManager } from '../../managers/ClientManager';
 import { OrganizationManager } from '../../managers/OrganizationManager';
-import { Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, User, MoreHorizontal, Send, UserPlus } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, User, Send, UserPlus } from 'lucide-react';
 import AddClientModal from './AddClientModal';
 import EditClientModal from './EditClientModal';
 import ClientDetailModal from './ClientDetailModal';

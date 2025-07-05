@@ -132,7 +132,6 @@ export class OrganizationManager {
         organizationId,
         permissions,
         isActive: true,
-        joinedAt: new Date(),
         profile: {
           firstName: displayName.split(' ')[0] || '',
           lastName: displayName.split(' ').slice(1).join(' ') || '',

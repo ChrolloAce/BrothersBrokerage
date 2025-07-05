@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { UserRole, OnboardingData } from '../../types/user';
+import { useState, useEffect } from 'react';
+import { UserRole, Organization, OnboardingData } from '../../types/user';
 import { OrganizationManager } from '../../managers/OrganizationManager';
-import { AuthService, User } from '../../services/AuthService';
 import { 
-  Building2, Users, User as UserIcon, ChevronRight, ChevronLeft, 
-  CheckCircle, AlertCircle, Loader2, Link, Mail
+  Building, Users, User as UserIcon, ChevronRight, ChevronLeft, 
+  Loader2, CheckCircle, XCircle, AlertCircle, Link, Mail 
 } from 'lucide-react';
 
 interface OnboardingProps {
@@ -21,7 +20,6 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
   });
 
   const orgManager = OrganizationManager.getInstance();
-  const authService = AuthService.getInstance();
 
   const handleRoleSelection = (role: UserRole) => {
     setOnboardingData({ ...onboardingData, role });
@@ -101,7 +99,7 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
       id: 'business-owner',
       title: 'Business Owner',
       description: 'I own or manage a brokerage/care organization',
-      icon: Building2,
+      icon: Building,
       color: 'blue',
       features: ['Full access to all features', 'Manage employees and clients', 'View all reports and analytics']
     },
@@ -129,7 +127,7 @@ const Onboarding = ({ user, onComplete }: OnboardingProps) => {
         {/* Progress Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Building2 className="w-8 h-8 text-blue-600 mr-2" />
+            <Building className="w-8 h-8 text-blue-600 mr-2" />
             <span className="text-2xl font-bold text-gray-900">Brothers Brokerage</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome! Let's get you set up</h1>
@@ -323,7 +321,7 @@ const BusinessOwnerSetup = ({ onSetup, loading, error }: BusinessOwnerSetupProps
             </>
           ) : (
             <>
-              <Building2 className="w-5 h-5 mr-2" />
+              <Building className="w-5 h-5 mr-2" />
               Create Organization
             </>
           )}
